@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+   
+<head>
+  
+        <link rel="icon" type="image/png" href="icon72.png" />
+        <link rel="manifest" href="manifest.json"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#607D8B"/>
+        <meta name = "keywords" content = "wiki search viewer, wiki api" />
+        <meta name = "description" content = "Wikipedia Viewer: search wikipedia"/>
+        <meta name = "author" content = "Ala Eddine Sleimi" />
+        <title>WikiViewer</title>
+    <style>
+        html,body {
+            padding: 0; 
+            margin: 0;
+            background: #fafafa;
+        }
+        main {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-content: center;
+            position: relative;
+            
+        }
+        header {
+           
+            background: #607D8B;
+            padding: none;
+            width: 100%;
+            height: 50vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 10vmin;
+        }
+        nav { 
+            display: flex;
+            background: #607D8B;
+            position: sticky;
+            align-content: center;
+            color: white;
+            top: 0;
+            height: 6vh;
+            font-size: 4.1vh;
+            padding-left: 1vh;
+            z-index: 100;
+        
+        }
+        nav * {
+            padding: 1vh;
+            cursor: pointer;
+        }
+        nav input[type="search"]{
+            background: #607D8B;
+            border: none;
+            flex-grow: 1;
+            height: 100%;
+            color: white;
+            font-weight: 600;
+            transition: all 0.2s ease-in;
+        }
+        nav a {
+            display: flex;
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            text-decoration: none;
+        }
+        nav input[type="search"]::placeholder{
+            color: #607D8B;;
+        }
+        nav input[type="search"]:focus{
+            background: white;
+            color: black;
+            
+        }
+        nav button {
+            height: 100%;
+            background: #607D8B;
+            border: none;
+            color: white;
+            outline: none;
+            align-self: flex-end;
+            
+        }
+        button:hover{
+            background: #78909C;
+            
+
+        }
+        button:active {
+            background:#CFD8DC
+        }
+.card {
+    background-color: #fff;
+    box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);
+    display: flex;
+    border-radius: 2px;
+    margin: 2vmin;
+    width: 400px;
+    max-width: 90vw;
+    
+}
+.card img{
+    border-radius: 2px 0 0 2px;
+    min-width: 25%;
+    width: 25%;
+}
+.card-title {
+    border-bottom: 1px solid rgba(160,160,160,0.2);
+    padding: 1vmin;
+}
+.card-content {
+    padding: 1vmin;
+}
+.NOFOUND {
+    padding: 5vmin;
+    height: 34vmin;
+    width: 34vmin;
+    justify-content: space-around;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    color: #CACAC5;
+   
+}
+.NOFOUND img {
+    width: 50%;
+}
+#scrollArea {
+    position: absolute;
+    bottom: 5%;
+    right: 5%;
+    background: red;
+    right: 10px;
+    width: 10px;
+  
+}
+</style>
+
+</head>
+<body>
+<header>
+   <h1>WikiViewer</h1> 
+</header>
+<nav>   
+        <label for="search"  target="search" title="search">&#8981;</label>
+        <input type="search" id="search"  onchange="search(this)" placeholder="search"/>
+       <a href="https://en.wikipedia.org/wiki/Special:Random" title="Random Article"><button>RANDOM</button></a> 
+</nav>
+
+
+
+
+<main>
+</main>
+<script>
+  "use strict"
+
+function wikiSearch(term,offset=0,limit=9){
+    const req = new XMLHttpRequest();
+    req.open('GET', `https://en.wikipedia.org/w/api.php?origin=*&formatversion=2&format=json&action=query&generator=search&gsrsearch=${term}&gsrlimit=${limit}&gsroffset=${offset}&prop=pageimages|extracts|info&inprop=url&pilimit=max&exintro&exsentences=3&exlimit=max&&pithumbsize=300`, true);
+    req.send();
+  
+    return new Promise((resolve,reject)=>{
+        req.onreadystatechange = function(event) {
+    // XMLHttpRequest.DONE === 4
+    if (this.readyState === XMLHttpRequest.DONE) {
+        if (this.status === 200) {
+            resolve(JSON.parse(this.response));
+        } else {
+           
+            reject(this);
+            
+        }
+    }
+
+
+    }})
+  
+}
+
+function toHTML(data){
+          const result = {size: 0, html:"",offset: 0 }
+        
+    if(data.query){
+        result.size = data.query.pages.length;
+        result.offset = data.continue.gsroffset
+      for(const page of data.query.pages){
+         
+        
+         if(!page.hasOwnProperty("thumbnail"))page.thumbnail= {source:"wiki.png"};
+         
+       
+         result.html +=`<div class="card"><img src=${page.thumbnail.source}>
+                            <div class="card-side">
+                             <div class="card-title"> <a href="${page.fullurl}">${page.title}</a> </div>
+                             <div class="card-content"> ${page.extract}  </div>
+                            </div>
+                        </div>`
+                    
+       } 
+      
+
+    }
+        
+        return result;
+        
+}
+let pause = false;
+  function search(el){
+
+        wikiSearch(el.value).then(toHTML).then(e =>{
+         let main =   document.getElementsByTagName("main")[0];
+        if(e.size){
+            e.html += `<div id="scrollArea"></div>`
+           main.innerHTML=e.html;
+            var options = {
+                 root: null,
+                 rootMargin: '0px',
+                 threshold: 1.0
+            }
+            var offset = e.offset;
+            var observer = new IntersectionObserver((z)=>{ 
+                if(z[0].isIntersecting){
+
+                    wikiSearch(el.value,offset).then(toHTML).then(v =>{
+                        if(v.size > 0){
+                                offset = v.offset;
+                                document.getElementById("scrollArea").insertAdjacentHTML("beforebegin",v.html);
+                        }
+                    }
+                    )
+                }
+            }, options);
+
+            observer.observe(document.querySelector("#scrollArea"))
+    
+        }else{
+           main.innerHTML = `<div class="NOFOUND"><img src="NOFOUND.png"/> <span> Found Nothing</span></div>`;
+        }
+        })
+  }
+  window.addEventListener('beforeinstallprompt', function(e) {
+  console.log('beforeinstallprompt Event fired');
+  e.preventDefault();
+  return false;
+});
+
+
+
+
+         
+     
+         
+  
+  
+</script>
+
+
+
+
+</body>
+
+</html>

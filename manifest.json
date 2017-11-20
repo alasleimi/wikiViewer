@@ -1,0 +1,36 @@
+
+   {
+  "name": "WikiViewer",
+  "short_name": "WikiView",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#fafafa",
+  "description": "Wikipedia Viewer: search wikipedia",
+  "icons": [
+       {
+    "src": "icon72.PNG",
+    "type": "image/png",
+    "sizes": "72x72"
+  
+
+    },
+       {
+    "src": "icon192.png",
+    "type": "image/png",
+    "sizes": "192x192"
+  
+
+    },
+    {
+    "src": "icon512.PNG",
+    "type": "image/png",
+    "sizes": "512x512"
+  
+
+    }],
+"theme_color": "#607D8B"
+ 
+}
+
+
+
