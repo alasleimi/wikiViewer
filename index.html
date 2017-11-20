@@ -61,7 +61,7 @@
             height: 100%;
             color: white;
             font-weight: 600;
-            transition: all 0.2s ease-in;
+            transition: all 0.1s ease-in;
         }
         nav a {
             display: flex;
@@ -260,7 +260,18 @@ let pause = false;
   
   
 </script>
-
+ <script>
+        "use strict"
+    if ('serviceWorker' in navigator) {
+ 
+        navigator.serviceWorker.register('service-worker.js')
+          .then(function(reg){
+            console.log("Yes, it did.");
+          }).catch(function(err) {
+            console.log("No it didn't. This happened: ", err)
+          });
+      }
+    </script>
 
 
 
